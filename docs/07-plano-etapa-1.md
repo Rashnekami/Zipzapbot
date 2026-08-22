@@ -9,6 +9,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 ## 7.1 Marcos
 
 ### M1 — Fundação do repositório
+
 - Remover o código legado (`src/gpt/gpt.js`, `src/index.js`, `whatsapp-web.js`,
   `openai@3`, `puppeteer`) e o `package.json` antigo; preservar `LICENSE` e o
   banner de `console.txt`.
@@ -22,6 +23,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 - CI: typecheck, lint, testes, build da imagem.
 
 ### M2 — Banco e filas
+
 - `migrations/0001_init.sql` — tabelas do §3.2, §3.3 e a parte de mídia/auditoria
   do §3.6. As tabelas de IA/memória entram na Etapa 2, mas `bot_messages` entra
   **agora**: é ela que registra tudo que enviamos.
@@ -31,6 +33,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
   zod; política de retry (3 tentativas, backoff exponencial) e DLQ.
 
 ### M3 — Conexão WhatsApp
+
 - Adaptador Baileys atrás de `WhatsAppGateway`, `baileys@6.7.24` exato.
 - QR no terminal (`qrcode-terminal`) e endpoint `GET /qr` na `api` protegido por
   token, para conectar sem acesso ao console.
@@ -42,6 +45,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
   seja impossível esquecer.
 
 ### M4 — Pipeline e registry de comandos
+
 - Normalização `WAMessage → IncomingMessage`.
 - Os 6 resolvers na ordem obrigatória. Os resolvers 4 e 5 já existem e já
   **detectam** menção e resposta; como o gateway é nulo, respondem uma mensagem
@@ -52,6 +56,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 - Rate limit por usuário e por grupo (Redis, janela deslizante).
 
 ### M5 — worker-media: YouTube
+
 - `packages/media/src/ytdlp.ts` — `spawn('yt-dlp', [...])`, nunca string.
 - Metadados por `--dump-single-json` **sem baixar**; bloqueio de playlist grande.
 - MP3: melhor fonte de áudio → `ffmpeg` → `loudnorm` (normalização sem distorção,
@@ -64,6 +69,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 - Cache de 24 h por `cache_key`; concorrência global 2; um job ativo por usuário.
 
 ### M6 — Conversões de mídia do grupo
+
 - `resolveTargetMedia` (legenda **ou** resposta) — §4.7.
 - Vídeo → áudio: aliases `converter`, `audio`, `mp3`, `!converter`, `!tomp3`
   (aceite 7). Download por streaming, extração com `ffmpeg`, envio, limpeza no
@@ -78,6 +84,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
   dependem de IA; respondem "disponível na próxima etapa".
 
 ### M7 — Letras
+
 - Porta `LyricsProvider` + adaptador **LRCLIB** (com `User-Agent` identificando a
   aplicação) e registry para provedores alternativos.
 - `!letra <música>`, `!letra <artista> - <música>`, e `!letra` respondendo a um
@@ -88,6 +95,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 - Cache em `lyrics_cache`.
 
 ### M8 — Segurança, empacotamento e aceite
+
 - `url-guard`: só `http`/`https`, allowlist de domínios, resolução de DNS com
   bloqueio de IP privado/loopback/link-local/metadata (anti-SSRF), sem seguir
   redirecionamento para fora da allowlist.
@@ -102,21 +110,21 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 
 ## 7.2 Critérios de aceite cobertos na Etapa 1
 
-| # | Critério | Como é testado |
-|---|---|---|
-| 1 | Mensagem comum não recebe resposta | Unidade: pipeline devolve `Ignore` e nenhum efeito colateral registrado |
-| 5 | Link do YouTube apresenta MP3/MP4 | Integração com `yt-dlp` falso; verifica menu numerado e `PendingChoice` |
-| 6 | MP3 convertido e enviado | Integração: `ffprobe` confirma MP3 válido, com tags e dentro do limite |
-| 7 | Vídeo + `converter` → áudio | Integração com fixture de vídeo curto |
-| 8 | Foto + `figurinha` → WebP válido | Integração: assinatura `RIFF/WEBP`, 512×512, alfa preservado, sem distorção |
-| 9 | Vídeo curto + `figurinha` → animada | Integração: WebP animado, duração dentro do teto |
-| 10 | `!letra` acerta ou oferece opções | Integração com LRCLIB falso |
-| 16 | Temporários apagados | Teste força erro e timeout e verifica diretório vazio |
-| 17 | Nenhuma credencial em log/repo | Teste de redaction do pino + varredura de segredo no CI |
-| 18 | Downloads simultâneos respeitam a fila | Integração: 5 jobs, concorrência 2, ordem e limite verificados |
-| 19 | Comando administrativo rejeita sem permissão | Unidade por comando + registro em `audit_log` |
-| 20 | Bot continua identificado como bot | `!menu`/`!status` exibem identificação; teste de snapshot |
-| 4 | IA nunca responde espontaneamente | Teste de arquitetura: só 2 resolvers emitem `AiIntent`; `NullAiGateway` prova que nada mais chama IA |
+| #   | Critério                                     | Como é testado                                                                                       |
+| --- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1   | Mensagem comum não recebe resposta           | Unidade: pipeline devolve `Ignore` e nenhum efeito colateral registrado                              |
+| 5   | Link do YouTube apresenta MP3/MP4            | Integração com `yt-dlp` falso; verifica menu numerado e `PendingChoice`                              |
+| 6   | MP3 convertido e enviado                     | Integração: `ffprobe` confirma MP3 válido, com tags e dentro do limite                               |
+| 7   | Vídeo + `converter` → áudio                  | Integração com fixture de vídeo curto                                                                |
+| 8   | Foto + `figurinha` → WebP válido             | Integração: assinatura `RIFF/WEBP`, 512×512, alfa preservado, sem distorção                          |
+| 9   | Vídeo curto + `figurinha` → animada          | Integração: WebP animado, duração dentro do teto                                                     |
+| 10  | `!letra` acerta ou oferece opções            | Integração com LRCLIB falso                                                                          |
+| 16  | Temporários apagados                         | Teste força erro e timeout e verifica diretório vazio                                                |
+| 17  | Nenhuma credencial em log/repo               | Teste de redaction do pino + varredura de segredo no CI                                              |
+| 18  | Downloads simultâneos respeitam a fila       | Integração: 5 jobs, concorrência 2, ordem e limite verificados                                       |
+| 19  | Comando administrativo rejeita sem permissão | Unidade por comando + registro em `audit_log`                                                        |
+| 20  | Bot continua identificado como bot           | `!menu`/`!status` exibem identificação; teste de snapshot                                            |
+| 4   | IA nunca responde espontaneamente            | Teste de arquitetura: só 2 resolvers emitem `AiIntent`; `NullAiGateway` prova que nada mais chama IA |
 
 Ficam para a Etapa 2 os critérios 2, 3, 11, 12, 14 (e 13, 15 para a Etapa 3) — a
 **detecção** de menção e de resposta já fica pronta e testada aqui; falta apenas

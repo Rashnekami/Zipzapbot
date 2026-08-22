@@ -7,14 +7,14 @@ comunicando por filas BullMQ.**
 
 Justificativa direta dos requisitos:
 
-| Requisito | Consequência arquitetural |
-|---|---|
-| "Não criar um arquivo monolítico com milhares de linhas" | Domínio em `packages/core`, cada capacidade em um módulo próprio registrado por um registry |
-| "Baileys em versão estável e fixada" (mas 7.x ainda é RC — ver §6) | Baileys fica atrás da porta `WhatsAppGateway`; trocar 6.7.24 → 7.x mexe em **um** adaptador |
-| Gateway de IA próprio, servindo mais de uma aplicação | Serviço `apps/gateway` com banco próprio; o core do bot só conhece a porta `AiGateway` |
-| "Memória não pode ficar presa ao provedor" | Memória é tabela no Postgres e é montada em prompt pelo `ContextBuilder`, não pelo histórico de conversa da OpenAI/Groq |
-| "Separar serviços: bot, api, worker-media, worker-ai" | Quatro aplicações, um único banco, uma única fila |
-| "Limitar downloads simultâneos", "um trabalho ativo por usuário" | Concorrência é propriedade do worker + BullMQ, não do processo do WhatsApp |
+| Requisito                                                          | Consequência arquitetural                                                                                               |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| "Não criar um arquivo monolítico com milhares de linhas"           | Domínio em `packages/core`, cada capacidade em um módulo próprio registrado por um registry                             |
+| "Baileys em versão estável e fixada" (mas 7.x ainda é RC — ver §6) | Baileys fica atrás da porta `WhatsAppGateway`; trocar 6.7.24 → 7.x mexe em **um** adaptador                             |
+| Gateway de IA próprio, servindo mais de uma aplicação              | Serviço `apps/gateway` com banco próprio; o core do bot só conhece a porta `AiGateway`                                  |
+| "Memória não pode ficar presa ao provedor"                         | Memória é tabela no Postgres e é montada em prompt pelo `ContextBuilder`, não pelo histórico de conversa da OpenAI/Groq |
+| "Separar serviços: bot, api, worker-media, worker-ai"              | Quatro aplicações, um único banco, uma única fila                                                                       |
+| "Limitar downloads simultâneos", "um trabalho ativo por usuário"   | Concorrência é propriedade do worker + BullMQ, não do processo do WhatsApp                                              |
 
 ### Regra de ouro: um único dono do socket
 
@@ -65,12 +65,12 @@ flowchart LR
   WAI -->|HTTP + X-Service-Token| GW
 ```
 
-| Serviço | Responsabilidade | Não faz |
-|---|---|---|
-| `bot` | Conectar, autenticar por QR, normalizar eventos, rodar o pipeline de intents, despachar comandos síncronos baratos, enfileirar os caros, consumir `outbound` | Nunca chama IA. Nunca roda `yt-dlp`/`ffmpeg` |
-| `api` | Painel/admin HTTP, healthchecks, upload de `.txt`/`.zip` de histórico, ajuste de limites, exportar auditoria | Nunca toca no socket |
-| `worker-media` | Download (`yt-dlp`), conversão (`ffmpeg`), figurinhas (`sharp`/`webpmux`), transcodificação, cache 24h, limpeza de temporários | Nunca chama IA |
-| `worker-ai` | Montar contexto, chamar `AiGateway`, aplicar circuit breaker e failover, processar blocos de histórico, gerar perfil de estilo | Nunca baixa mídia |
+| Serviço        | Responsabilidade                                                                                                                                             | Não faz                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `bot`          | Conectar, autenticar por QR, normalizar eventos, rodar o pipeline de intents, despachar comandos síncronos baratos, enfileirar os caros, consumir `outbound` | Nunca chama IA. Nunca roda `yt-dlp`/`ffmpeg` |
+| `api`          | Painel/admin HTTP, healthchecks, upload de `.txt`/`.zip` de histórico, ajuste de limites, exportar auditoria                                                 | Nunca toca no socket                         |
+| `worker-media` | Download (`yt-dlp`), conversão (`ffmpeg`), figurinhas (`sharp`/`webpmux`), transcodificação, cache 24h, limpeza de temporários                               | Nunca chama IA                               |
+| `worker-ai`    | Montar contexto, chamar `AiGateway`, aplicar circuit breaker e failover, processar blocos de histórico, gerar perfil de estilo                               | Nunca baixa mídia                            |
 
 `database` e `queue` são serviços de infraestrutura do Compose (PostgreSQL 16 e
 Redis 7), sem código próprio.

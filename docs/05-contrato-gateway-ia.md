@@ -90,7 +90,7 @@ Content-Type: application/json
   "latency_ms": 780,
   "attempts": [
     { "provider": "a", "ok": false, "http_status": 429, "latency_ms": 320 },
-    { "provider": "b", "ok": true,  "latency_ms": 780 }
+    { "provider": "b", "ok": true, "latency_ms": 780 }
   ],
   "request_id": "..."
 }
@@ -132,7 +132,7 @@ export interface AiRequest {
 export interface AiMessage {
   role: 'user' | 'assistant';
   content: string;
-  trusted: boolean;              // false para tudo que veio do grupo
+  trusted: boolean; // false para tudo que veio do grupo
 }
 
 export interface AiCallOptions {
@@ -143,14 +143,24 @@ export interface AiCallOptions {
 }
 
 export type AiResult =
-  | { ok: true;  text: string; provider: string; model: string;
+  | {
+      ok: true;
+      text: string;
+      provider: string;
+      model: string;
       usage: { promptTokens?: number; completionTokens?: number };
-      latencyMs: number; attempts: AiAttempt[] }
+      latencyMs: number;
+      attempts: AiAttempt[];
+    }
   | { ok: false; reason: AiFailure; attempts: AiAttempt[] };
 
 export type AiFailure =
-  | 'quota_exceeded' | 'all_providers_failed' | 'circuit_open'
-  | 'timeout' | 'invalid_response' | 'refused';
+  | 'quota_exceeded'
+  | 'all_providers_failed'
+  | 'circuit_open'
+  | 'timeout'
+  | 'invalid_response'
+  | 'refused';
 ```
 
 `attempts[]` é o que torna o critério de aceite 11 observável de fora.
@@ -163,8 +173,11 @@ Cada provedor é um arquivo implementando uma interface pequena:
 // apps/gateway/src/providers/provider.ts
 export interface ProviderAdapter {
   readonly name: string;
-  complete(input: NormalizedRequest, cred: Credential, signal: AbortSignal)
-    : Promise<NormalizedResponse>;
+  complete(
+    input: NormalizedRequest,
+    cred: Credential,
+    signal: AbortSignal,
+  ): Promise<NormalizedResponse>;
   classifyError(e: unknown): 'retryable' | 'fatal' | 'rate_limited';
 }
 ```
@@ -214,12 +227,12 @@ tentativa em outra credencial do mesmo provedor conta como o mesmo provedor.
 
 ## 5.7 Failover e circuit breaker
 
-| Condição | Ação |
-|---|---|
-| `429` / limite | próxima **credencial** do mesmo provedor; esgotadas, próximo provedor |
-| `5xx`, timeout, conexão recusada, modelo fora do ar | próximo provedor |
-| `4xx` que não seja 429 | **para**; erro `fatal`, sem gastar outro provedor |
-| 3 provedores tentados | para; `all_providers_failed` |
+| Condição                                            | Ação                                                                  |
+| --------------------------------------------------- | --------------------------------------------------------------------- |
+| `429` / limite                                      | próxima **credencial** do mesmo provedor; esgotadas, próximo provedor |
+| `5xx`, timeout, conexão recusada, modelo fora do ar | próximo provedor                                                      |
+| `4xx` que não seja 429                              | **para**; erro `fatal`, sem gastar outro provedor                     |
+| 3 provedores tentados                               | para; `all_providers_failed`                                          |
 
 **Circuit breaker por (provedor, credencial):** 5 falhas consecutivas abrem por
 60 s → `half_open` libera 1 sondagem → sucesso fecha e zera; falha reabre com

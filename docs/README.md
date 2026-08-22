@@ -12,16 +12,16 @@ mensagem do bot.
 
 ## Índice
 
-| # | Documento | Conteúdo |
-|---|-----------|----------|
-| 1 | [Arquitetura](./01-arquitetura.md) | Estilo arquitetural, serviços, limites, decisões (ADRs) |
-| 2 | [Estrutura de diretórios](./02-estrutura-de-diretorios.md) | Monorepo, pacotes, responsabilidades |
-| 3 | [Modelo do banco](./03-modelo-de-dados.md) | Tabelas, DDL, retenção, criptografia |
-| 4 | [Fluxo das mensagens](./04-fluxo-de-mensagens.md) | Pipeline ordenado, gate da IA, detecção de menção/resposta |
-| 5 | [Gateway de IA próprio](./05-contrato-gateway-ia.md) | Serviço `apps/gateway`: rota, adaptadores, pool de credenciais, failover, banco |
-| 6 | [Riscos e dependências](./06-riscos-e-dependencias.md) | Riscos técnicos, legais e de fornecedor, com mitigação |
-| 7 | [Plano da Etapa 1](./07-plano-etapa-1.md) | Escopo, marcos, entregas, critérios de aceite cobertos |
-| 8 | [Checklist de segurança e privacidade](./08-checklist-seguranca-privacidade.md) | Controles obrigatórios e o que não será implementado |
+| #   | Documento                                                                       | Conteúdo                                                                        |
+| --- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1   | [Arquitetura](./01-arquitetura.md)                                              | Estilo arquitetural, serviços, limites, decisões (ADRs)                         |
+| 2   | [Estrutura de diretórios](./02-estrutura-de-diretorios.md)                      | Monorepo, pacotes, responsabilidades                                            |
+| 3   | [Modelo do banco](./03-modelo-de-dados.md)                                      | Tabelas, DDL, retenção, criptografia                                            |
+| 4   | [Fluxo das mensagens](./04-fluxo-de-mensagens.md)                               | Pipeline ordenado, gate da IA, detecção de menção/resposta                      |
+| 5   | [Gateway de IA próprio](./05-contrato-gateway-ia.md)                            | Serviço `apps/gateway`: rota, adaptadores, pool de credenciais, failover, banco |
+| 6   | [Riscos e dependências](./06-riscos-e-dependencias.md)                          | Riscos técnicos, legais e de fornecedor, com mitigação                          |
+| 7   | [Plano da Etapa 1](./07-plano-etapa-1.md)                                       | Escopo, marcos, entregas, critérios de aceite cobertos                          |
+| 8   | [Checklist de segurança e privacidade](./08-checklist-seguranca-privacidade.md) | Controles obrigatórios e o que não será implementado                            |
 
 ## Princípios inegociáveis do projeto
 
