@@ -1,5 +1,10 @@
 # 3. Modelo do banco (PostgreSQL 16)
 
+> **Fonte da verdade:** a partir do M2, o schema real vive em `migrations/*.sql`.
+> Este documento descreve o modelo completo, incluindo tabelas que só entram nas
+> Etapas 2 a 4. Há teste de integração que compara `packages/db/src/schema.ts`
+> com o schema aplicado, coluna a coluna, então divergência quebra o CI.
+>
 > **Validado:** todo o DDL desta página foi extraído e executado contra um
 > PostgreSQL 16.13 real (17 tabelas criadas, sem erro), e os comportamentos
 > críticos foram testados: segundo consentimento ativo para a mesma persona é

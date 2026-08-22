@@ -48,12 +48,37 @@ ou fora de faixa — ele lista de uma vez tudo que precisa ser corrigido.
 ## Verificação
 
 ```bash
-pnpm run verify      # typecheck estrito + lint + testes
-pnpm run test        # só os testes
-pnpm run typecheck   # só os tipos
-pnpm run lint        # só o lint
-pnpm run format      # aplica o Prettier
+pnpm run verify            # typecheck estrito + lint + testes
+pnpm run test:unit         # testes que não precisam de banco nem Redis
+pnpm run test:integration  # testes contra Postgres e Redis reais
+pnpm run typecheck
+pnpm run lint
+pnpm run format
 ```
+
+Os testes de integração são **pulados** quando `TEST_DATABASE_URL` e
+`TEST_REDIS_URL` não estão definidas, para que a suíte unitária rode sem
+infraestrutura:
+
+```bash
+export TEST_DATABASE_URL=postgres://zipzap:zipzap@localhost:5432/zipzap_test
+export TEST_REDIS_URL=redis://localhost:6379
+pnpm run test:integration
+```
+
+## Banco de dados
+
+```bash
+pnpm run build        # o CLI de migrations roda a partir do dist
+pnpm run db:status    # o que está aplicado e o que falta
+pnpm run db:migrate   # aplica as pendentes
+```
+
+Cada migration roda na própria transação, protegida por um advisory lock — duas
+réplicas subindo ao mesmo tempo não se atropelam. Migration já aplicada que teve
+o arquivo alterado faz o runner **recusar** a subida, em vez de deixar ambientes
+divergirem em silêncio. Não há `down`: a correção é uma migration nova, revisada
+como qualquer outra mudança.
 
 ## Estrutura
 

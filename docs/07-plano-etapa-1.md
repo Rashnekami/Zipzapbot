@@ -8,7 +8,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 
 ## 7.1 Marcos
 
-### M1 — Fundação do repositório
+### M1 — Fundação do repositório ✅
 
 - Remover o código legado (`src/gpt/gpt.js`, `src/index.js`, `whatsapp-web.js`,
   `openai@3`, `puppeteer`) e o `package.json` antigo; preservar `LICENSE` e o
@@ -22,7 +22,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
   tipados).
 - CI: typecheck, lint, testes, build da imagem.
 
-### M2 — Banco e filas
+### M2 — Banco e filas ✅
 
 - `migrations/0001_init.sql` — tabelas do §3.2, §3.3 e a parte de mídia/auditoria
   do §3.6. As tabelas de IA/memória entram na Etapa 2, mas `bot_messages` entra
