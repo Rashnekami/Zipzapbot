@@ -6,10 +6,9 @@ figurinhas, letras, jogos, administração) que **nunca** consome IA, e um modo 
 que **só** é acionado por menção real ao JID do bot ou por resposta direta a uma
 mensagem do bot.
 
-> **Estado atual:** documento de projeto aprovado para revisão. Nenhuma linha da
-> implementação nova foi escrita ainda — conforme combinado, a arquitetura é
-> apresentada antes da implementação. O código legado (`src/`, `whatsapp-web.js`,
-> `openai@3`) permanece intocado e será removido no primeiro commit da Etapa 1.
+> **Estado atual:** desenho aprovado; implementação da Etapa 1 em andamento.
+> Duas decisões registradas em 2026-08-22: Baileys fixado em `6.7.24` exato
+> (ADR-01) e **gateway de IA próprio** em vez de consumir o do WebiCheck (ADR-07).
 
 ## Índice
 
@@ -19,7 +18,7 @@ mensagem do bot.
 | 2 | [Estrutura de diretórios](./02-estrutura-de-diretorios.md) | Monorepo, pacotes, responsabilidades |
 | 3 | [Modelo do banco](./03-modelo-de-dados.md) | Tabelas, DDL, retenção, criptografia |
 | 4 | [Fluxo das mensagens](./04-fluxo-de-mensagens.md) | Pipeline ordenado, gate da IA, detecção de menção/resposta |
-| 5 | [Contrato do gateway de IA](./05-contrato-gateway-ia.md) | Porta normalizada, failover, **o que preciso do WebiCheck** |
+| 5 | [Gateway de IA próprio](./05-contrato-gateway-ia.md) | Serviço `apps/gateway`: rota, adaptadores, pool de credenciais, failover, banco |
 | 6 | [Riscos e dependências](./06-riscos-e-dependencias.md) | Riscos técnicos, legais e de fornecedor, com mitigação |
 | 7 | [Plano da Etapa 1](./07-plano-etapa-1.md) | Escopo, marcos, entregas, critérios de aceite cobertos |
 | 8 | [Checklist de segurança e privacidade](./08-checklist-seguranca-privacidade.md) | Controles obrigatórios e o que não será implementado |

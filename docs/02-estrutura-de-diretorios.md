@@ -28,7 +28,16 @@ zipzapbot/
 │  │  └─ package.json
 │  ├─ api/                      # Fastify: admin, health, upload de histórico
 │  ├─ worker-media/             # yt-dlp, ffmpeg, sharp
-│  └─ worker-ai/                # gateway de IA, resumos, perfil de estilo
+│  ├─ worker-ai/                # chama o gateway, resumos, perfil de estilo
+│  └─ gateway/                  # NOSSO gateway de IA (banco próprio, multi-app)
+│     └─ src/
+│        ├─ main.ts             # Fastify, rede interna, sem porta pública
+│        ├─ auth/               # token por aplicação (argon2id), cota da app
+│        ├─ routing/            # capacidade -> modelo, ordem de provedores
+│        ├─ credentials/        # pool, rodízio, resfriamento, cifra AES-256-GCM
+│        ├─ breaker/            # circuit breaker por (provedor, credencial)
+│        ├─ providers/          # openai-compatible.ts + adaptadores próprios
+│        └─ db/                 # migrations do gateway_db (separado do bot)
 │
 ├─ packages/
 │  ├─ core/                     # domínio + casos de uso — SEM I/O, SEM dependências pesadas

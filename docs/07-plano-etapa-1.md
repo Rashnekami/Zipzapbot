@@ -120,7 +120,14 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 
 Ficam para a Etapa 2 os critérios 2, 3, 11, 12, 14 (e 13, 15 para a Etapa 3) — a
 **detecção** de menção e de resposta já fica pronta e testada aqui; falta apenas
-ligar o gateway real.
+ligar o gateway.
+
+> A Etapa 2 cresceu com a decisão de construir gateway próprio (§5): além de
+> menção, resposta citada, personalidade e memória, ela passa a incluir
+> `apps/gateway` — autenticação por aplicação, pool de credenciais, failover,
+> circuit breaker e banco próprio. Em compensação, deixou de depender de terceiro,
+> e o critério 11 vira teste nosso, com provedores falsos, em vez de teste contra
+> um serviço que não controlamos.
 
 ## 7.3 Ordem de entrega
 

@@ -1,7 +1,7 @@
 # 3. Modelo do banco (PostgreSQL 16)
 
 > **Validado:** todo o DDL desta página foi extraído e executado contra um
-> PostgreSQL 16.13 real (18 tabelas criadas, sem erro), e os comportamentos
+> PostgreSQL 16.13 real (17 tabelas criadas, sem erro), e os comportamentos
 > críticos foram testados: segundo consentimento ativo para a mesma persona é
 > rejeitado pelo índice parcial; `DELETE` de usuário limpa seus `memory_facts` e
 > desvincula a persona; `DELETE` de grupo apaga memória, fatos, personas,
@@ -244,16 +244,9 @@ CREATE TABLE ai_usage (
   created_at        timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX ai_usage_quota_idx ON ai_usage (group_id, created_at DESC);
-
-CREATE TABLE ai_provider_health (
-  provider             text PRIMARY KEY,
-  state                text NOT NULL DEFAULT 'closed'
-    CHECK (state IN ('closed','open','half_open')),
-  consecutive_failures integer NOT NULL DEFAULT 0,
-  opened_at            timestamptz,
-  next_probe_at        timestamptz,
-  updated_at           timestamptz NOT NULL DEFAULT now()
-);
+-- Saúde de provedor NÃO fica aqui: circuit breaker por provedor é responsabilidade
+-- do gateway (tabela credential_health em gateway_db, §5.8). Esta tabela responde
+-- a uma pergunta do bot: quanto este grupo e este participante já usaram hoje.
 
 CREATE TABLE media_jobs (
   id             uuid PRIMARY KEY,

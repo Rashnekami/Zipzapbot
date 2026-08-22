@@ -25,7 +25,7 @@ verificado: `npm install baileys@^6.7.24` resolve para `6.7.24`), mas essa
 proteção é comportamento de gerenciador, não garantia do contrato — outro
 gerenciador, ou um lockfile gerado em máquina antiga, pode resolver diferente.
 
-**Decisão:** fixar `"baileys": "6.7.24"` — versão exata, sem `^` e sem `~` —
+**Decisão tomada:** fixar `"baileys": "6.7.24"` — versão exata, sem `^` e sem `~` —
 commitar `pnpm-lock.yaml`, e ligar `pnpm audit` no CI. O briefing pede "versão
 estável e fixada": `6.7.24` é a única que atende às duas condições hoje.
 
@@ -52,7 +52,7 @@ autoridade. Por isso "resposta ao bot" é decidida por consulta a `bot_messages`
 | R7 | Credenciais da sessão Baileys vazadas (equivalem à conta) | Sequestro do WhatsApp | Volume dedicado, cifrado em repouso, fora da imagem, no `.gitignore`, nunca em log |
 | R8 | Prompt injection vinda do histórico do grupo | Bot manipulado | `PromptGuard` (§4.4), dados delimitados e rotulados, filtro de saída, nenhuma ação privilegiada acessível por texto |
 | R9 | Redis como ponto único de falha | Filas param | `appendonly yes`, healthcheck, jobs idempotentes, retry com backoff; comandos baratos continuam funcionando sem fila |
-| R10 | Custo/limite de IA estourado por uso abusivo | Conta suspensa | Cota diária por grupo e por participante, circuit breaker, teto de 3 provedores, IA nunca espontânea |
+| R10 | Custo/limite de IA estourado por uso abusivo | Conta suspensa | Cota diária por grupo e por participante (bot) + cota por aplicação (gateway), circuit breaker, teto de 3 provedores, IA nunca espontânea |
 | R11 | Mensagem maior que o limite do WhatsApp (letra longa) | Envio falha | Divisão ordenada em partes ou envio como `.txt` (§4 do briefing) |
 | R12 | Migração de JID para LID quebra menção e permissão | IA nunca aciona; admin não reconhecido | `SelfIdentity` com as duas identidades, `users.lid`, teste dedicado (§4.2) |
 
@@ -95,10 +95,26 @@ do Docker o README trará o passo de instalação.
 
 Nenhuma atualização vai para produção sem aprovação explícita.
 
-## 6.6 Bloqueios atuais
+## 6.6 Riscos do gateway próprio
 
-1. **Contrato do gateway do WebiCheck** (§5.6) — bloqueia apenas a Etapa 2. A
-   Etapa 1 não depende disso.
-2. **Número de WhatsApp para testes** — necessário para os critérios de aceite que
+Construir o gateway em vez de consumir o do WebiCheck troca uma dependência
+externa por responsabilidade nossa. O que isso traz:
+
+| # | Risco | Mitigação |
+|---|---|---|
+| G1 | O gateway vira ponto único de falha da IA | Circuit breaker interno, `GET /health`, e degradação honesta: sem gateway, o bot responde que a IA está indisponível — comandos, downloads e figurinhas seguem funcionando, porque nada disso usa IA |
+| G2 | Chaves de vários provedores concentradas em um processo | Cifradas em repouso com KEK fora do banco, serviço sem porta pública no Compose, `redact` no log, token de aplicação como hash argon2id |
+| G3 | Nome de modelo e limite de camada gratuita mudam com frequência | Nada embutido no código: `providers` e `models` são tabelas; trocar modelo é `UPDATE`, não deploy |
+| G4 | Múltiplas contas por provedor podem esbarrar em termos de uso | Conferir os termos de cada provedor ao cadastrar. Contas separadas por aplicação costumam ser aceitas; somar cota gratuita com várias contas nem sempre é. O gateway funciona com uma credencial por provedor — só com teto menor |
+| G5 | Erro de cada provedor tem formato próprio | `classifyError` por adaptador, traduzindo para `retryable`/`fatal`/`rate_limited`; erro `fatal` não gasta o próximo provedor |
+| G6 | Custo silencioso se um provedor pago entrar no pool | `usage_log` por aplicação, cota diária por app, e provedor pago desabilitado por padrão |
+
+## 6.7 Bloqueios atuais
+
+1. **Número de WhatsApp para testes** — necessário para os critérios de aceite que
    exigem sessão real. Recomendo um chip dedicado, nunca o pessoal.
+2. **Credenciais dos provedores** — a conta separada que você vai criar. Só é
+   necessária no início da Etapa 2; a Etapa 1 inteira roda sem nenhuma chave de IA.
 3. **Aprovação de deploy** — não haverá deploy em produção sem seu aval explícito.
+
+O contrato do WebiCheck deixou de ser bloqueio: não vamos mais depender dele.
