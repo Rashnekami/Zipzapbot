@@ -129,10 +129,10 @@ Duas decisões que valem explicação:
 **D1 — Núcleo seguro (agora).** Ritmo de envio, modelo de dados, destinos
 registrados, fila de publicação sequencial. Sem integração com rede nenhuma.
 
-**D2 — Oferta manual.** O operador cola o link do produto, o sistema converte
-para link de afiliado com a tag dele, monta o post com imagem e preço, agenda e
-publica. **Entrega valor sem depender de aprovação de nenhuma rede** — Amazon,
-Shopee e afins exigem cadastro aprovado, e isso costuma travar semanas.
+**D2 — Oferta manual (níveis A e B da §9.8).** O lojista cola o link — pronto do
+painel, ou cru com a tag aplicada por regra de URL. O sistema monta o post com
+imagem e preço, agenda e publica. **Entrega valor sem depender de aprovação de
+nenhuma rede.**
 
 **D3 — Redes de afiliados.** Um adaptador por rede, atrás de uma porta comum.
 Depende de saber em quais o comerciante já tem conta aprovada.
@@ -142,8 +142,86 @@ rotação de conteúdo, encurtador com rastreio de clique, painel.
 
 **D5 — Telegram.** Mesmo módulo, adaptador novo. Sem risco de banimento.
 
-## 9.7 O que ainda não sei
+## 9.7 Sistema único por lojista (ADR-09)
 
-Para o D3 preciso saber **em quais redes o comerciante já tem conta aprovada** —
-cada uma tem API, autenticação e formato de deeplink próprios, e construir para a
-rede errada é trabalho jogado fora. O D1 e o D2 não dependem disso.
+Decidido em 2026-08-23: **uma instalação por lojista**, não uma plataforma
+multi-inquilino. Cada lojista tem seu próprio banco, seu próprio número de
+WhatsApp e suas próprias credenciais de afiliado.
+
+O que isso **remove** do projeto:
+
+- Tabela de inquilinos, isolamento por linha, escopo em toda consulta
+- Contas de usuário, planos, cobrança, limites por assinatura
+- Pool de sessões do WhatsApp e roteamento de mensagem por inquilino
+- Toda a classe de bug em que o dado de um lojista aparece para outro
+
+Isso é uma simplificação grande e sincera: multi-inquilino é onde mora a maior
+parte da complexidade de um produto como o DivulgaNinja, e não vamos pagá-la.
+
+O que isso **cobra**:
+
+- Dez lojistas são dez instalações, dez números e dez atualizações.
+- Mitigação: **uma imagem Docker só**, um `.env` por lojista, `docker compose up`
+  por cliente. Atualizar é subir a versão nova da mesma imagem em cada um.
+- As credenciais de afiliado vivem no ambiente da instalação, não num painel
+  compartilhado.
+
+## 9.8 Link de afiliado não precisa de API; catálogo de ofertas precisa
+
+Duas coisas costumam ser confundidas, e a diferença define o cronograma.
+
+**1. Transformar o link do produto no link de afiliado.** Na maioria das redes é
+regra de URL, não API:
+
+| Rede          | Como o link é formado                                          | Precisa de API?                                                                  |
+| ------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Amazon        | Parâmetro `tag=` na URL do produto                             | Não                                                                              |
+| Shopee        | Link gerado no painel, com até 5 `sub_id` para rastrear origem | Não                                                                              |
+| Mercado Livre | Parâmetro de tag / `matt_tool` na URL                          | Não — e pelas fontes encontradas **não existe** API pública oficial de afiliados |
+
+**2. Descobrir ofertas e obter título, preço, preço antigo e imagem.** É aqui, e
+só aqui, que a API é necessária — e é aqui que a Amazon trava.
+
+### O bloqueio da Amazon, com os números
+
+Para a conta de afiliado sobreviver: **3 vendas qualificadas em 180 dias**. Para
+**manter acesso à PA-API**: **10 vendas qualificadas nos últimos 30 dias**, de
+forma contínua
+([Associates Central](https://affiliate-program.amazon.com/help/node/topic/GUVFJTV7MGMMNY94)).
+
+Consequência prática: um afiliado novo **não consegue** usar a API da Amazon, e
+um afiliado estabelecido **perde** o acesso se as vendas caírem num mês fraco.
+Construir a base do produto sobre a PA-API é construir sobre algo que pode sumir
+justamente quando o lojista mais precisa.
+
+### Os três níveis, e o que cada um exige
+
+| Nível                        | O lojista faz                        | O sistema faz                                     | Exige                                      |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------- | ------------------------------------------ |
+| **A. Link pronto**           | Gera o link no painel da rede e cola | Formata o post, agenda, publica, respeita o ritmo | **Nada.** Funciona hoje, com qualquer rede |
+| **B. Link cru + tag**        | Cola o link do produto               | Aplica a regra de URL da rede e monta o post      | Só a tag de afiliado dele                  |
+| **C. Descoberta automática** | Nada                                 | Busca ofertas, ranqueia, publica sozinho          | API aprovada de cada rede                  |
+
+O nível A entrega valor **no primeiro dia** e não depende de aprovação nenhuma.
+O C é o que o DivulgaNinja vende, e é o que fica refém das regras de cada rede.
+
+### Sobre ler título e preço da página
+
+Existe um meio-termo: ler as tags Open Graph da página do produto para preencher
+título e imagem sem API. Funciona em vários sites, mas convém saber antes de
+depender disso: quebra quando a loja muda o HTML, marketplaces grandes bloqueiam
+acesso automatizado ativamente, e os termos de uso costumam restringir coleta.
+Serve como conveniência, com o lojista podendo corrigir o que vier errado —
+não como base do produto.
+
+## 9.9 O que ainda não sei
+
+Para o D3 preciso saber, do lojista:
+
+1. **Em quais redes ele já é afiliado aprovado** e qual a tag ou ID dele em cada.
+2. **Se ele já gera os links no painel** — se sim, o nível A resolve e o D3 vira
+   otimização, não requisito.
+3. **Se ele tem acesso à PA-API da Amazon hoje** — pelos números da §9.8, o mais
+   provável é que não.
+
+O D1 e o D2 não dependem de nada disso.
