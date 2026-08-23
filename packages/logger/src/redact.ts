@@ -39,6 +39,24 @@ export const REDACT_PATHS: readonly string[] = [
   'headers.cookie',
   'headers["x-service-token"]',
   'err.config.headers.authorization',
+
+  // Material criptografico do pareamento do WhatsApp.
+  //
+  // Estes nomes nao foram deduzidos: apareceram no log em nivel info na
+  // primeira execucao real do bot, emitidos pelo logger interno do Baileys
+  // durante o handshake. Nenhum deles tem nome que sugira segredo, entao a
+  // lista generica acima nao os pegaria.
+  'advSecretKey',
+  'noiseKey',
+  'signedIdentityKey',
+  'signedPreKey',
+  'pairingEphemeralKeyPair',
+  'helloMsg',
+  'devicePairingData',
+  '*.advSecretKey',
+  '*.ephemeral',
+  'node.devicePairingData',
+  'helloMsg.clientHello.ephemeral',
 ];
 
 /**

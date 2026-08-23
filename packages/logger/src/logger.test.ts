@@ -68,3 +68,48 @@ describe('createLogger — critério de aceite 17', () => {
     expect(linha?.['name']).toBe('bot');
   });
 });
+
+describe('material de pareamento do WhatsApp', () => {
+  // O payload abaixo e o que o logger interno do Baileys emitiu, em nivel info,
+  // na primeira conexao real do bot. Nenhum destes campos tem nome que sugira
+  // segredo, entao a lista generica de nomes nao os pegava.
+  it('nao imprime chave efemera nem dados de pareamento do dispositivo', () => {
+    const { stream, linhas } = captura();
+    const log = createLogger({ destination: stream, level: 'info' });
+
+    log.info(
+      {
+        helloMsg: {
+          clientHello: { ephemeral: 'FJ+b95Rs+bR0S6xmPPLHM9AATjLJdsD9sH7U4qC8+BE=' },
+        },
+        node: {
+          devicePairingData: {
+            eIdent: 'uUeHH/3P7WDZpbzMoNJbVL28a9jwMS809LmmBCPs430=',
+            eSkeyVal: 'w7TQEvSx7NbdmPAnW1EAuwY4uzOmBhkZQT6pyL5MdAg=',
+            eSkeySig: 'nVinUg3W60tycwdEf2O/5Tp+MUnwS/FOnc7H9BUYOleBiVBhLJYQ',
+          },
+        },
+      },
+      'connected to WA',
+    );
+
+    const texto = JSON.stringify(linhas());
+    for (const segredo of [
+      'FJ+b95Rs+bR0S6xmPPLHM9AATjLJdsD9sH7U4qC8+BE=',
+      'uUeHH/3P7WDZpbzMoNJbVL28a9jwMS809LmmBCPs430=',
+      'w7TQEvSx7NbdmPAnW1EAuwY4uzOmBhkZQT6pyL5MdAg=',
+      'nVinUg3W60tycwdEf2O/5Tp+MUnwS/FOnc7H9BUYOleBiVBhLJYQ',
+    ]) {
+      expect(texto, `vazou: ${segredo.slice(0, 16)}...`).not.toContain(segredo);
+    }
+  });
+
+  it('nao imprime a chave secreta de pareamento das credenciais', () => {
+    const { stream, linhas } = captura();
+    const log = createLogger({ destination: stream });
+
+    log.info({ creds: { advSecretKey: 'CHAVE-DE-PAREAMENTO-REAL' } }, 'creds.update');
+
+    expect(JSON.stringify(linhas())).not.toContain('CHAVE-DE-PAREAMENTO-REAL');
+  });
+});

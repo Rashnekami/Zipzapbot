@@ -32,7 +32,7 @@ e recebe `NullAiGateway`, que recusa qualquer chamada. Isso permite validar 13 d
 - `packages/queue`: filas `media`, `outbound`, `maintenance`; contratos de job com
   zod; política de retry (3 tentativas, backoff exponencial) e DLQ.
 
-### M3 — Conexão WhatsApp
+### M3 — Conexão WhatsApp ✅
 
 - Adaptador Baileys atrás de `WhatsAppGateway`, `baileys@6.7.24` exato.
 - QR no terminal (`qrcode-terminal`) e endpoint `GET /qr` na `api` protegido por

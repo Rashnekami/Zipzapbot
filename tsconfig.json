@@ -15,6 +15,12 @@
     },
     {
       "path": "./packages/queue"
+    },
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./apps/bot"
     }
   ]
 }

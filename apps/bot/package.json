@@ -1,0 +1,26 @@
+{
+  "name": "@zipzap/bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node dist/main.js",
+    "dev": "node --watch dist/main.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@zipzap/config": "workspace:*",
+    "@zipzap/core": "workspace:*",
+    "@zipzap/db": "workspace:*",
+    "@zipzap/logger": "workspace:*",
+    "@zipzap/queue": "workspace:*",
+    "@zipzap/shared": "workspace:*",
+    "baileys": "6.7.24",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/qrcode-terminal": "^0.12.2"
+  }
+}

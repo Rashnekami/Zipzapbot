@@ -20,8 +20,9 @@ Dois modos **estritamente separados**:
 | Etapa 2         | Gateway de IA próprio, memória, personalidade         | ⏸️ depois da Etapa 1                            |
 | Etapas 3–4      | Histórico importado, administração, jogos             | ⏸️ planejadas                                   |
 
-O bot **ainda não conecta ao WhatsApp** — isso chega no M3. O que existe hoje é a
-base sobre a qual o resto é construído, com verificação automatizada.
+O bot **já conecta ao WhatsApp e gera QR Code**. Ele ainda não responde a nada:
+o pipeline de comandos chega no M4. Esse silêncio é o comportamento correto —
+é o critério de aceite 1.
 
 ## Requisitos
 
@@ -65,6 +66,33 @@ export TEST_DATABASE_URL=postgres://zipzap:zipzap@localhost:5432/zipzap_test
 export TEST_REDIS_URL=redis://localhost:6379
 pnpm run test:integration
 ```
+
+## Conectando pela primeira vez
+
+```bash
+pnpm run build
+pnpm run db:migrate
+pnpm --filter @zipzap/bot start
+```
+
+O QR Code aparece no terminal. No celular: **WhatsApp → Configurações →
+Aparelhos conectados → Conectar um aparelho**. O código expira em cerca de um
+minuto e é substituído automaticamente; basta ler o mais recente.
+
+Conectou uma vez, não precisa repetir: a sessão fica em `SESSION_DIR`,
+**cifrada com AES-256-GCM**, e o próximo boot reconecta sozinho.
+
+Sobre esses arquivos de sessão:
+
+- Eles equivalem a **acesso total à conta** — quem os copia entra sem QR e sem
+  aviso. Por isso são cifrados, gravados com permissão `0600` e ficam fora do
+  repositório e da imagem Docker.
+- Perder `ENCRYPTION_KEY` torna a sessão irrecuperável, e aí é ler o QR de novo.
+- Trocar de chave, apagar a pasta ou o WhatsApp encerrar a sessão levam ao mesmo
+  lugar: o bot pede um QR novo em vez de entrar em ciclo de erro.
+
+Use um número dedicado. Baileys é biblioteca não oficial, e o WhatsApp pode
+bloquear contas que considere automatizadas.
 
 ## Banco de dados
 

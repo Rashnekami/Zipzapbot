@@ -1,7 +1,7 @@
 # 8. Checklist de segurança e privacidade
 
 Estado: `[ ]` a implementar · `[x]` implementado · `[—]` não se aplica à etapa.
-Todos começam em `[ ]` porque a implementação ainda não foi iniciada.
+Atualizado ao fim do M3.
 
 ## 8.1 Entrada e rede
 
@@ -24,18 +24,18 @@ Todos começam em `[ ]` porque a implementação ainda não foi iniciada.
 ## 8.3 Arquivos
 
 - [ ] Diretório temporário por job, nome gerado aleatoriamente
-- [ ] Nome de arquivo nunca derivado de entrada do usuário
-- [ ] Caminho canonicalizado e validado dentro da raiz permitida (anti path traversal)
+- [x] Nome de arquivo nunca derivado de entrada do usuário
+- [x] Caminho canonicalizado e validado dentro da raiz permitida (anti path traversal) — na sessão; falta nos temporários de mídia
 - [ ] Limpeza em `finally`, cobrindo sucesso, erro e timeout
 - [ ] Varredura periódica de temporários órfãos
 - [ ] Cache de mídia expira em 24 h e é removido do disco junto com a linha
 
 ## 8.4 Segredos
 
-- [ ] Segredo só em variável de ambiente; `.env` no `.gitignore`
-- [ ] `.env.example` sem valor real
-- [ ] Credenciais da sessão Baileys cifradas em repouso, em volume dedicado
-- [ ] `redact` no pino para token, `Authorization`, `X-Service-Token`, telefone e JID
+- [x] Segredo só em variável de ambiente; `.env` no `.gitignore`
+- [x] `.env.example` sem valor real (com teste que falha se algo com cara de segredo entrar)
+- [x] Credenciais da sessão Baileys cifradas em repouso (AES-256-GCM), permissão `0600`
+- [x] `redact` no pino para token, `Authorization`, `X-Service-Token`, telefone e JID — mais material de pareamento do WhatsApp (§6.1.1)
 - [ ] Nenhum token em mensagem de erro enviada ao WhatsApp
 - [ ] Varredura de segredo no CI, falhando o build
 - [ ] Rotação documentada para `AI_GATEWAY_TOKEN` e `ENCRYPTION_KEY`

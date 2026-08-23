@@ -35,6 +35,16 @@ export const envSchema = z.object({
   // --- geral ---
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+  /**
+   * Nivel do logger interno do Baileys, separado do nosso.
+   *
+   * Fica em 'warn' por padrao porque a biblioteca emite, em nivel info, o
+   * handshake completo com material criptografico de pareamento. Baixar para
+   * 'debug' so em investigacao, ciente de que o log vai conter segredo.
+   */
+  BAILEYS_LOG_LEVEL: z
+    .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'])
+    .default('warn'),
   TZ: z.string().default('America/Sao_Paulo'),
 
   // --- identidade do bot ---

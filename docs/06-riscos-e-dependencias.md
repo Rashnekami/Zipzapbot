@@ -39,6 +39,27 @@ de mensagens, campos de `contextInfo` controlados pelo remetente não servem com
 autoridade. Por isso "resposta ao bot" é decidida por consulta a `bot_messages`
 (§4.3), não por `contextInfo.participant`.
 
+## 6.1.1 Achado da primeira execução real: a biblioteca registra segredo em log
+
+Na primeira conexão de verdade (M3), o logger interno do Baileys emitiu **em
+nível `info`** o handshake completo, incluindo a chave efêmera do `clientHello` e
+o bloco `devicePairingData` com `eIdent`, `eSkeyVal` e `eSkeySig`.
+
+Nenhum desses campos tem nome que sugira segredo, então a lista genérica de
+nomes redigidos não os alcançava. Em um agregador de logs, isso seria material
+criptográfico de pareamento exposto a quem tem acesso de leitura aos logs.
+
+Corrigido em duas camadas:
+
+1. **Na origem** — o Baileys recebe um logger próprio, em `warn` por padrão
+   (`BAILEYS_LOG_LEVEL`), separado do logger da aplicação.
+2. **Na saída** — os campos observados entraram na lista de redação, com teste
+   que usa o payload real capturado, e verificação por execução: a segunda
+   conexão gravou zero ocorrências dos termos vazados.
+
+Fica registrado como lembrete de método: dependência de terceiro decide sozinha
+o que registrar, e só rodar de verdade mostra o quê.
+
 ## 6.2 Riscos técnicos
 
 | #   | Risco                                                                          | Impacto                                | Mitigação                                                                                                                                 |
