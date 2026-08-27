@@ -9,6 +9,7 @@ import {addHistory,clearHistory,getHistory} from "./ai/history.js";
 import {systemPrompt} from "./ai/persona.js";
 import {moodStatus,processMood} from "./ai/mood.js";
 import {transcribeAudio} from "./ai/transcription.js";
+import {searchWeb} from "./ai/web.js";
 import {downloadUrl,lyrics,toMp3,toSticker} from "./media.js";
 import qrcodeTerminal from "qrcode-terminal";
 let lastQrPrintedAt=0;
@@ -38,9 +39,10 @@ async function answerAI(sock:WASocket,m:WAMessage,text:string){
 }
 
 async function command(sock:WASocket,m:WAMessage,text:string){const jid=m.key.remoteJid!;const [raw,...rest]=text.slice(config.PREFIX.length).trim().split(/\s+/);const cmd=raw?.toLowerCase(),arg=rest.join(" ");
- if(cmd==="ajuda"||cmd==="menu")return reply(sock,m,`*${config.BOT_NAME}*\n\n${config.PREFIX}ia pergunta — conversar com a IA\n${config.PREFIX}ia — respondendo um áudio, transcreve e responde\n${config.PREFIX}humor — ver como o bot está com você\n${config.PREFIX}fig — imagem/vídeo para figurinha\n${config.PREFIX}audio — vídeo/áudio para MP3\n${config.PREFIX}video URL — baixar vídeo\n${config.PREFIX}mp3 URL — baixar música\n${config.PREFIX}letra música/artista\n${config.PREFIX}reset — limpar memória da IA\n\nNo grupo, você também pode marcar o bot ou responder uma mensagem dele.`);
+ if(cmd==="ajuda"||cmd==="menu")return reply(sock,m,`*${config.BOT_NAME}*\n\n${config.PREFIX}ia pergunta — conversar com a IA\n${config.PREFIX}ia — respondendo um áudio, transcreve e responde\n${config.PREFIX}pesquisar assunto — buscar informação atual na internet\n${config.PREFIX}humor — ver como o bot está com você\n${config.PREFIX}fig — imagem/vídeo para figurinha\n${config.PREFIX}audio — vídeo/áudio para MP3\n${config.PREFIX}video URL — baixar vídeo\n${config.PREFIX}mp3 URL — baixar música\n${config.PREFIX}letra música/artista\n${config.PREFIX}reset — limpar memória da IA\n\nNo grupo, você também pode marcar o bot ou responder uma mensagem dele.`);
  if(cmd==="ia"){let question=arg;if(!question&&hasAudio(m)){await react(sock,m,"⏳");question=`[Áudio transcrito]: ${await audioText(m)}`;await react(sock,m,"✅")}if(!question)return reply(sock,m,`Use: ${config.PREFIX}ia sua pergunta ou responda um áudio com ${config.PREFIX}ia`);return answerAI(sock,m,question)}
  if(cmd==="humor"){const mood=await moodStatus(senderId(m),senderName(m));return reply(sock,m,mood.blocked?`Tô de mal contigo por mais ou menos ${mood.minutes} min 😒`:`Minha irritação contigo tá em ${mood.irritation}/${config.BOT_IRRITATION_THRESHOLD}. Se comporta 😂`)}
+ if(cmd==="pesquisar"||cmd==="pesquisa"){if(!arg)return reply(sock,m,`Use: ${config.PREFIX}pesquisar o que você quer saber`);await react(sock,m,"🔎");const result=await searchWeb(arg);await react(sock,m,"✅");return reply(sock,m,result)}
  if(cmd==="reset"){clearHistory(jid);return reply(sock,m,"Memória da IA limpa ✅")}
  if(cmd==="fig"){await react(sock,m,"⏳");const out=await toSticker(await mediaBuffer(m));await sock.sendMessage(jid,{sticker:out},{quoted:m});return react(sock,m,"✅")}
  if(cmd==="audio"){await react(sock,m,"⏳");const out=await toMp3(await mediaBuffer(m));await sock.sendMessage(jid,{audio:out,mimetype:"audio/mpeg",ptt:false},{quoted:m});return react(sock,m,"✅")}

@@ -21,6 +21,7 @@ Também pode ser iniciado com `docker compose up -d --build`.
 - `!mp3 URL`
 - `!letra música e artista`
 - `!ia` respondendo um áudio para transcrever e responder
+- `!pesquisar assunto` para pesquisar na internet com Gemini/Google e fallback OpenAI
 - `!humor` para consultar a irritação do bot com você
 - `!reset`
 
