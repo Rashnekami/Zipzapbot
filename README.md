@@ -1,6 +1,6 @@
 # ZipZapBot 2
 
-Bot de WhatsApp para Node.js 22, TypeScript e Baileys. Inclui painel protegido para QR Code, figurinhas, conversão de mídia, download via yt-dlp, letras e gateway próprio com fallback entre Groq, Gemini e OpenRouter.
+Bot de WhatsApp para Node.js 22, TypeScript e Baileys. Inclui painel protegido para QR Code, figurinhas, conversão de mídia, download via yt-dlp, letras e gateway próprio com fallback entre OpenAI, Gemini, Groq e OpenRouter.
 
 ## Instalação no servidor
 
