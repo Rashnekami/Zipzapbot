@@ -1,0 +1,7 @@
+services:
+  zipzapbot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports: ["8123:8123"]
+    volumes: ["./data:/app/data"]

@@ -1,35 +1,20 @@
-FROM alpine
+FROM node:22-alpine AS build
+RUN apk add --no-cache git
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+RUN npm ci
+COPY src ./src
+RUN npm run build
 
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    nodejs \
-    npm \
-    ffmpeg
-
-# Env var for Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-WORKDIR /usr/src/app
-
+FROM node:22-alpine
+RUN apk add --no-cache ffmpeg ca-certificates
+WORKDIR /app
+ENV NODE_ENV=production
 COPY package*.json ./
-
-RUN npm install
-
-RUN addgroup -S app && adduser -S -G app app
-
-COPY --chown=app:app . .
-
-# Change permissions for the whole app directory
-RUN chmod -R 777 /usr/src/app
-
-USER app
-
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=build /app/dist ./dist
+RUN mkdir -p /app/data && chown -R node:node /app
+USER node
 EXPOSE 8123
-
-CMD [ "npm", "start" ]
+VOLUME ["/app/data"]
+CMD ["npm","start"]
