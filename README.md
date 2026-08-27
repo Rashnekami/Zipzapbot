@@ -6,7 +6,7 @@ Bot de WhatsApp para Node.js 22, TypeScript e Baileys. Inclui painel protegido p
 
 1. Instale Node.js 22 e FFmpeg.
 2. Copie `.env.example` para `.env` e altere usuário, senha e chaves.
-3. Execute `npm ci && npm run build && npm start`.
+3. Execute `npm ci && npm start` (o build é executado automaticamente).
 4. Abra `http://IP-OU-DOMINIO:8123`, faça login e escaneie o QR.
 5. Preserve a pasta `data/` entre reinicializações.
 
